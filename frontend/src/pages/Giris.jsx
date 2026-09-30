@@ -60,7 +60,7 @@ export default function Giris({ onGirisYapildi }) {
     <div className="uygulama" style={{ maxWidth: 420, marginTop: 60 }}>
       <h1 className="uygulama-baslik" style={{ justifyContent: 'center', flexDirection: 'column', gap: 4 }}>
         <GoncaLogo boyut={56} />
-        <span>Gonca</span>
+        <span>Turan Tarım</span>
         <span style={{ fontSize: 13, color: 'var(--renk-metin-soluk)', letterSpacing: 1, textTransform: 'uppercase' }}>
           Eskişehir Promosyon · v1
         </span>

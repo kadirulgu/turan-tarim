@@ -142,5 +142,5 @@ Arayüz üzerinde çalışırken anında yenilenen geliştirme sunucusu için
 `cd "frontend"; npm run dev` (http://localhost:5173) hâlâ kullanılabilir.
 
 **Telefona kurulum (Android):** Chrome'da siteyi aç → sağ üstteki ⋮ menü →
-"Ana ekrana ekle" / "Uygulamayı yükle". Gonca simgesiyle tam ekran açılır.
+"Ana ekrana ekle" / "Uygulamayı yükle". Turan Tarım simgesiyle tam ekran açılır.
 turanlar tarım projeyi çalıştır

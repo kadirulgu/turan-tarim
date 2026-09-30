@@ -121,7 +121,7 @@ export default function Kilavuz() {
     <div>
       <h2>📘 Kullanım Kılavuzu</h2>
       <p style={{ maxWidth: 680, color: 'var(--renk-metin-soluk)' }}>
-        Gonca; çiftçilerle yapılan arazi kiralama ve ortaklık sözleşmelerini, arazilerin harita
+        Turan Tarım takip sistemi; çiftçilerle yapılan arazi kiralama ve ortaklık sözleşmelerini, arazilerin harita
         üzerindeki gerçek sınırlarını, hangi arazide hangi ürünün ekili olduğunu ve güncel
         hava/piyasa bilgilerini tek bir yerden takip etmeniz için hazırlandı.
       </p>

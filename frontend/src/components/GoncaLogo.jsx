@@ -9,7 +9,7 @@ export default function GoncaLogo({ boyut = 64, className }) {
       height={boyut}
       className={className}
       role="img"
-      aria-label="Gonca logosu"
+      aria-label="Turan Tarım logosu"
     >
       <circle cx="60" cy="60" r="58" fill="#1b5e20" />
       <line x1="60" y1="83" x2="60" y2="102" stroke="#a5d6a7" strokeWidth="4" strokeLinecap="round" />
