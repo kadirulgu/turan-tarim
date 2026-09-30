@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MapContainer, TileLayer, Polygon, Popup, LayersControl, useMap } from 'react-leaflet';
-import { LatLngBounds, control, DomUtil, divIcon, layerGroup, marker, polygon as leafletPoligon } from 'leaflet';
+import { LatLngBounds, circle, control, DomEvent, DomUtil, divIcon, layerGroup, marker, polygon as leafletPoligon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { api } from '../api';
 
@@ -312,6 +312,101 @@ function PusulaKontrolu() {
   return null;
 }
 
+// "Konumum" butonu: ilk basışta konum takibini başlatır ve haritayı konuma getirir,
+// sonraki basışlarda yeniden konuma odaklar. Mavi nokta + doğruluk halkası gösterilir.
+function KonumKontrolu() {
+  const map = useMap();
+
+  useEffect(() => {
+    let izlemeId = null;
+    let nokta = null;
+    let halka = null;
+    let sonKonum = null;
+    let odaklanacak = false;
+    let buton = null;
+
+    const durumYaz = (durum) => {
+      buton.classList.toggle('konum-aktif', durum === 'aktif');
+      buton.classList.toggle('konum-bekliyor', durum === 'bekliyor');
+    };
+
+    const konumGeldi = ({ coords }) => {
+      sonKonum = [coords.latitude, coords.longitude];
+      if (!nokta) {
+        halka = circle(sonKonum, { radius: coords.accuracy, color: '#1a73e8', weight: 1, fillOpacity: 0.12, interactive: false }).addTo(map);
+        nokta = marker(sonKonum, {
+          icon: divIcon({ className: '', html: '<div class="konum-nokta"></div>', iconSize: [22, 22], iconAnchor: [11, 11] }),
+          interactive: false,
+          zIndexOffset: 1000,
+        }).addTo(map);
+      } else {
+        nokta.setLatLng(sonKonum);
+        halka.setLatLng(sonKonum).setRadius(coords.accuracy);
+      }
+      durumYaz('aktif');
+      if (odaklanacak) {
+        odaklanacak = false;
+        map.setView(sonKonum, Math.max(map.getZoom(), 16));
+      }
+    };
+
+    const konumHatasi = (hata) => {
+      durumYaz(null);
+      if (izlemeId !== null) navigator.geolocation.clearWatch(izlemeId);
+      izlemeId = null;
+      alert(
+        hata.code === 1
+          ? 'Konum izni verilmedi. Tarayıcı ayarlarından bu site için konum iznini açın.'
+          : 'Konum alınamadı. Konum servisinin (GPS) açık olduğundan emin olup tekrar deneyin.'
+      );
+    };
+
+    const tiklandi = (e) => {
+      e.preventDefault();
+      if (!navigator.geolocation) {
+        alert('Bu tarayıcı konum özelliğini desteklemiyor.');
+        return;
+      }
+      if (izlemeId === null) {
+        odaklanacak = true;
+        durumYaz('bekliyor');
+        izlemeId = navigator.geolocation.watchPosition(konumGeldi, konumHatasi, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+      } else if (sonKonum) {
+        map.setView(sonKonum, Math.max(map.getZoom(), 16));
+      }
+    };
+
+    const kontrol = control({ position: 'topleft' });
+    kontrol.onAdd = () => {
+      const kapsayici = DomUtil.create('div', 'leaflet-bar');
+      buton = DomUtil.create('a', 'konum-buton', kapsayici);
+      buton.href = '#';
+      buton.title = 'Konumumu göster';
+      buton.setAttribute('role', 'button');
+      buton.setAttribute('aria-label', 'Konumumu göster');
+      buton.innerHTML =
+        '<svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+      DomEvent.on(buton, 'click', tiklandi);
+      DomEvent.disableClickPropagation(kapsayici);
+      return kapsayici;
+    };
+    kontrol.addTo(map);
+
+    return () => {
+      if (izlemeId !== null) navigator.geolocation.clearWatch(izlemeId);
+      try {
+        nokta?.remove();
+        halka?.remove();
+        kontrol.remove();
+      } catch {
+        // harita zaten kaldırılmışsa yok sayılır
+      }
+    };
+  }, [map]);
+
+  return null;
+}
+
 // Başka bir sayfaya geçerken açık kalan popup/tooltip, react-leaflet'in harita
 // DOM'unu temizlerken React'in aynı düğümü kaldırmaya çalışmasına ve "removeChild"
 // hatasına yol açabiliyor. Sayfadan ayrılmadan hemen önce tüm katmanların
@@ -589,6 +684,7 @@ export default function Harita() {
         <ParselEtiketleri featureCollection={featureCollection} />
         <ParselEtiketleri featureCollection={referansParseller} />
         <PusulaKontrolu />
+        <KonumKontrolu />
         <PopupTemizleyici />
         <LayersControl position="topright">
           <LayersControl.BaseLayer checked name="Uydu">

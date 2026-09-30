@@ -751,6 +751,45 @@ tbody tr:hover {
   background: rgba(255, 255, 255, 0.45);
 }
 
+/* Haritada "Konumum" butonu ve mavi konum noktası */
+.leaflet-bar a.konum-buton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #444;
+}
+
+.leaflet-bar a.konum-buton.konum-aktif {
+  color: #1a73e8;
+}
+
+.leaflet-bar a.konum-buton.konum-bekliyor {
+  color: #1a73e8;
+  animation: konum-yanip-son 1s ease-in-out infinite;
+}
+
+@keyframes konum-yanip-son {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.konum-nokta {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1a73e8;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.6), 0 1px 4px rgba(0, 0, 0, 0.4);
+  animation: konum-nabiz 2s ease-out infinite;
+}
+
+@keyframes konum-nabiz {
+  to {
+    box-shadow: 0 0 0 16px rgba(26, 115, 232, 0), 0 1px 4px rgba(0, 0, 0, 0.4);
+  }
+}
+
 .don-uyari {
   color: var(--renk-kirmizi);
   font-weight: 700;
