@@ -756,6 +756,34 @@ tbody tr:hover {
   font-size: 10px;
 }
 
+/* Çiftçi / Cari: kimlik kartından doldurma */
+.kimlik-okuma {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  font-size: 14px;
+}
+
+.kimlik-buton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 9px 16px;
+  border-radius: 7px;
+  background: var(--renk-yesil-koyu);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kimlik-buton.pasif {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 /* "Telefonuna uygulama olarak kur" kartı */
 .kurulum-onerisi {
   display: flex;

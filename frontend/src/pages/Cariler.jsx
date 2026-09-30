@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, dosyaAc } from '../api';
 import IlIlceSecici from '../components/IlIlceSecici';
+import { buyukHarfBasla, kimlikFotografiniOku, tcGecerliMi } from '../kimlikOku';
 
 const bosForm = {
   isim_unvan: '',
@@ -25,6 +26,31 @@ export default function Cariler() {
   const [form, setForm] = useState(bosForm);
   const [pdfDosya, setPdfDosya] = useState(null);
   const [hata, setHata] = useState('');
+  // Kimlik kartı okuma durumu: null | { ilerleme } | { sonuc } | { hata }
+  const [kimlikOkuma, setKimlikOkuma] = useState(null);
+
+  const kimliktenDoldur = async (e) => {
+    const dosya = e.target.files[0];
+    e.target.value = '';
+    if (!dosya) return;
+    setKimlikOkuma({ ilerleme: 0 });
+    try {
+      const sonuc = await kimlikFotografiniOku(dosya, (ilerleme) => setKimlikOkuma({ ilerleme }));
+      if (!sonuc.tc && !sonuc.ad && !sonuc.soyad) {
+        setKimlikOkuma({ hata: 'Kimlik okunamadı. Kartı düz bir zemine koyup, ışığı iyi bir yerde, yansıma olmadan ve kart ekranı dolduracak şekilde tekrar çekin.' });
+        return;
+      }
+      setForm((f) => ({
+        ...f,
+        kimlik_turu: 'tc',
+        isim_unvan: sonuc.ad && sonuc.soyad ? buyukHarfBasla(`${sonuc.ad} ${sonuc.soyad}`) : f.isim_unvan,
+        tc_no: sonuc.tc || f.tc_no,
+      }));
+      setKimlikOkuma({ sonuc });
+    } catch {
+      setKimlikOkuma({ hata: 'Kimlik okunurken hata oluştu. İnternet bağlantısını kontrol edip tekrar deneyin.' });
+    }
+  };
 
   const yukle = () => api.get('/cariler').then((res) => setListe(res.data));
 
@@ -40,6 +66,10 @@ export default function Cariler() {
       setHata('TC Kimlik No 11 haneli rakamdan oluşmalı.');
       return;
     }
+    if (form.kimlik_turu === 'tc' && form.tc_no && !tcGecerliMi(form.tc_no)) {
+      setHata('Geçersiz TC Kimlik No — rakamları kontrol edin.');
+      return;
+    }
     if (form.kimlik_turu === 'vergi' && form.vergi_no && !/^\d{10}$/.test(form.vergi_no)) {
       setHata('Vergi No 10 haneli rakamdan oluşmalı.');
       return;
@@ -51,6 +81,7 @@ export default function Cariler() {
       await api.post('/cariler', veri, { headers: { 'Content-Type': 'multipart/form-data' } });
       setForm(bosForm);
       setPdfDosya(null);
+      setKimlikOkuma(null);
       yukle();
     } catch (err) {
       setHata(err.response?.data?.detay || 'Kayıt eklenemedi.');
@@ -67,6 +98,37 @@ export default function Cariler() {
       <h2>👤 Çiftçi / Cari Kayıtları</h2>
 
       <form className="form-kart" onSubmit={ekle} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+        <div className="kimlik-okuma">
+          <label className={`kimlik-buton${kimlikOkuma?.ilerleme !== undefined ? ' pasif' : ''}`}>
+            📷 Kimlik Kartından Doldur
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={kimliktenDoldur}
+              disabled={kimlikOkuma?.ilerleme !== undefined}
+              hidden
+            />
+          </label>
+          {kimlikOkuma?.ilerleme !== undefined && (
+            <span className="soluk-metin">Kimlik okunuyor… %{kimlikOkuma.ilerleme}</span>
+          )}
+          {kimlikOkuma?.hata && <span className="hata-mesaji">{kimlikOkuma.hata}</span>}
+          {kimlikOkuma?.sonuc && (
+            <span>
+              {kimlikOkuma.sonuc.tc ? (
+                <b style={{ color: 'var(--renk-yesil)' }}>✓ TC Kimlik No geçerli</b>
+              ) : (
+                <b className="uyari-metni">⚠ TC Kimlik No okunamadı, elle girin</b>
+              )}
+              {kimlikOkuma.sonuc.dogumTarihi && (
+                <span className="soluk-metin"> · Doğum: {kimlikOkuma.sonuc.dogumTarihi.split('-').reverse().join('.')}</span>
+              )}
+              <span className="soluk-metin"> · Okunan bilgileri kaydetmeden önce kontrol edin.</span>
+            </span>
+          )}
+        </div>
+
         <input
           placeholder="Firma Ünvanı / Alıcı İsmi / Ad Soyad"
           value={form.isim_unvan}
