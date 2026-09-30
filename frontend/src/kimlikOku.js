@@ -84,9 +84,16 @@ async function fotografiHazirla(dosya) {
   const tuval = document.createElement('canvas');
   tuval.width = Math.round(resim.width * oran);
   tuval.height = Math.round(resim.height * oran);
-  const ctx = tuval.getContext('2d');
-  ctx.filter = 'grayscale(1) contrast(1.4)';
+  const ctx = tuval.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(resim, 0, 0, tuval.width, tuval.height);
+  // ctx.filter Safari'de her sürümde yok; gri tonlama ve kontrast piksel piksel yapılır
+  const pikseller = ctx.getImageData(0, 0, tuval.width, tuval.height);
+  const p = pikseller.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const gri = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
+    p[i] = p[i + 1] = p[i + 2] = Math.max(0, Math.min(255, (gri - 128) * 1.4 + 128));
+  }
+  ctx.putImageData(pikseller, 0, 0);
   return tuval;
 }
 
