@@ -755,3 +755,55 @@ tbody tr:hover {
   font-weight: 700;
   font-size: 10px;
 }
+
+/* Telefon ekranı */
+@media (max-width: 700px) {
+  .uygulama {
+    padding: 12px 12px 48px;
+  }
+
+  .uygulama-baslik {
+    font-size: 19px;
+    margin-bottom: 12px;
+  }
+
+  /* Menü tek satır, yana kaydırılır */
+  .gezinme {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-bottom: 16px;
+  }
+
+  .gezinme::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gezinme a,
+  .gezinme button {
+    flex: none;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  /* Geniş tablolar sayfayı değil kendi içini kaydırır */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  th,
+  td {
+    white-space: nowrap;
+  }
+
+  /* iPhone yazı kutusuna dokununca ekranı büyütmesin */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    max-width: 100%;
+  }
+}

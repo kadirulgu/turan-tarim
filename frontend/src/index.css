@@ -16,6 +16,12 @@
   font: 16px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   background: var(--renk-krem);
