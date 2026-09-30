@@ -55,25 +55,50 @@ function mrzAdSoyad(satirlar) {
   return { soyad: soyad.replace(/</g, ' '), ad: ad.replace(/</g, ' ').trim() };
 }
 
-function dogumTarihiBul(metin, satirlar) {
-  const tarih = metin.match(/\b(\d{2})[./](\d{2})[./](\d{4})\b/);
-  if (tarih) return `${tarih[3]}-${tarih[2]}-${tarih[1]}`;
-  // MRZ 2. satır: YYMMDD + kontrol hanesi ile başlar
-  const mrz = satirlar.map((s) => s.replace(/\s/g, '')).find((s) => /^\d{7}[MF<]\d{7}/.test(s));
-  if (!mrz) return null;
-  const [yy, aa, gg] = [mrz.slice(0, 2), mrz.slice(2, 4), mrz.slice(4, 6)];
-  const yil = Number(yy) > new Date().getFullYear() % 100 ? `19${yy}` : `20${yy}`;
-  return `${yil}-${aa}-${gg}`;
+// Arka yüz MRZ 1. satırı: I<TUR + seri no (9) + kontrol hanesi + TC ...
+// 2. satırı: doğum YYMMDD + kontrol + cinsiyet (M/F) + son geçerlilik YYMMDD + kontrol ...
+function mrzBilgileri(satirlar) {
+  const bitisik = satirlar.map((s) => s.replace(/\s/g, ''));
+  const sonuc = {};
+  const s1 = bitisik.find((s) => /^I[<A-Z]TUR[A-Z0-9]{9}/.test(s));
+  if (s1) sonuc.seriNo = s1.slice(5, 14);
+  const s2 = bitisik.find((s) => /^\d{7}[MF<]\d{7}/.test(s));
+  if (s2) {
+    const tarih = (yymmdd, gecmis) => {
+      const yy = Number(yymmdd.slice(0, 2));
+      // Doğum tarihi geçmişte; son geçerlilik genelde gelecekte (2000'ler)
+      const yuzyil = gecmis && yy > new Date().getFullYear() % 100 ? 1900 : 2000;
+      return `${yuzyil + yy}-${yymmdd.slice(2, 4)}-${yymmdd.slice(4, 6)}`;
+    };
+    sonuc.dogumTarihi = tarih(s2.slice(0, 6), true);
+    if (s2[7] !== '<') sonuc.cinsiyet = s2[7] === 'M' ? 'E' : 'K';
+    sonuc.gecerlilik = tarih(s2.slice(8, 14), false);
+  }
+  return sonuc;
 }
 
 export function kimlikMetniniAyristir(metin) {
   const satirlar = metin.split('\n').map((s) => s.trim()).filter(Boolean);
-  const mrz = mrzAdSoyad(satirlar);
+  const mrzAd = mrzAdSoyad(satirlar);
+  const mrz = mrzBilgileri(satirlar);
+
+  // Ön yüzde iki tarih var: doğum tarihi (en eski) ve son geçerlilik (en yeni)
+  const tarihler = [...metin.matchAll(/\b(\d{2})[./](\d{2})[./](\d{4})\b/g)]
+    .map((t) => `${t[3]}-${t[2]}-${t[1]}`)
+    .sort();
+  const cinsiyet = metin.match(/\b([EK])\s*\/\s*([MF])\b/);
+  const seriNo = metin.replace(/\s/g, '').match(/[A-Z]\d{2}[A-Z]\d{5}/);
+
   return {
     tc: tcBul(metin),
-    soyad: basliginAltindaki(satirlar, /soyad|surname/i) || mrz?.soyad || null,
-    ad: basliginAltindaki(satirlar, /^ad[ıi]?\b|given/i) || mrz?.ad || null,
-    dogumTarihi: dogumTarihiBul(metin, satirlar),
+    soyad: basliginAltindaki(satirlar, /soyad|surname/i) || mrzAd?.soyad || null,
+    ad: basliginAltindaki(satirlar, /^ad[ıi]?\b|given/i) || mrzAd?.ad || null,
+    dogumTarihi: tarihler[0] || mrz.dogumTarihi || null,
+    gecerlilik: (tarihler.length > 1 ? tarihler.at(-1) : null) || mrz.gecerlilik || null,
+    cinsiyet: cinsiyet?.[1] || mrz.cinsiyet || null,
+    seriNo: seriNo?.[0] || mrz.seriNo || null,
+    anneAdi: basliginAltindaki(satirlar, /anne|mother/i),
+    babaAdi: basliginAltindaki(satirlar, /baba|father/i),
   };
 }
 

@@ -54,8 +54,15 @@ function veriyiHazirla(body) {
     iban,
     sozlesme_tarihi,
     sozlesme_no,
+    dogum_tarihi,
+    cinsiyet,
+    kimlik_seri_no,
+    kimlik_gecerlilik,
+    anne_adi,
+    baba_adi,
   } = body;
 
+  const kisiMi = kimlik_turu !== 'vergi';
   return [
     isim_unvan,
     ciftci_mi === true || ciftci_mi === 'true',
@@ -72,6 +79,13 @@ function veriyiHazirla(body) {
     iban ? iban.replace(/\s+/g, '').toUpperCase() : null,
     sozlesme_tarihi || null,
     sozlesme_no || null,
+    // Kimlik bilgileri yalnızca kişi (TC) kayıtlarında tutulur
+    (kisiMi && dogum_tarihi) || null,
+    (kisiMi && ['E', 'K'].includes(cinsiyet) && cinsiyet) || null,
+    (kisiMi && kimlik_seri_no) || null,
+    (kisiMi && kimlik_gecerlilik) || null,
+    (kisiMi && anne_adi) || null,
+    (kisiMi && baba_adi) || null,
   ];
 }
 
@@ -94,8 +108,10 @@ router.post('/', pdfYukle, async (req, res) => {
     const { rows } = await pool.query(
       `INSERT INTO cariler
         (isim_unvan, ciftci_mi, alici_mi, kimlik_turu, tc_no, vergi_no, vergi_dairesi, telefon, adres, il, ilce, mahalle,
-         iban, sozlesme_tarihi, sozlesme_no, sozlesme_dosyasi, sozlesme_dosya_adi)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+         iban, sozlesme_tarihi, sozlesme_no,
+         dogum_tarihi, cinsiyet, kimlik_seri_no, kimlik_gecerlilik, anne_adi, baba_adi,
+         sozlesme_dosyasi, sozlesme_dosya_adi)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)
        RETURNING *`,
       [...degerler, sozlesmeDosyasi, sozlesmeDosyaAdi]
     );
@@ -132,8 +148,9 @@ router.put('/:id', pdfYukle, async (req, res) => {
         isim_unvan=$1, ciftci_mi=$2, alici_mi=$3, kimlik_turu=$4, tc_no=$5, vergi_no=$6,
         vergi_dairesi=$7, telefon=$8, adres=$9, il=$10, ilce=$11, mahalle=$12,
         iban=$13, sozlesme_tarihi=$14, sozlesme_no=$15,
-        sozlesme_dosyasi=$16, sozlesme_dosya_adi=$17
-       WHERE id=$18 RETURNING *`,
+        dogum_tarihi=$16, cinsiyet=$17, kimlik_seri_no=$18, kimlik_gecerlilik=$19, anne_adi=$20, baba_adi=$21,
+        sozlesme_dosyasi=$22, sozlesme_dosya_adi=$23
+       WHERE id=$24 RETURNING *`,
       [...degerler, sozlesmeDosyasi, sozlesmeDosyaAdi, req.params.id]
     );
     if (!rows[0]) return res.status(404).json({ error: 'Bulunamadı' });

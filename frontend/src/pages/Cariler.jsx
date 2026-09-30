@@ -19,7 +19,32 @@ const bosForm = {
   iban: '',
   sozlesme_tarihi: '',
   sozlesme_no: '',
+  dogum_tarihi: '',
+  cinsiyet: '',
+  kimlik_seri_no: '',
+  kimlik_gecerlilik: '',
+  anne_adi: '',
+  baba_adi: '',
 };
+
+// Listede kimlik kartı bilgilerinin özeti; bilgi yoksa hücre boş kalır (telefonda satır gizlenir)
+function kimlikBilgileri(c) {
+  const satirlar = [
+    c.dogum_tarihi && `Doğum: ${c.dogum_tarihi.slice(0, 10).split('-').reverse().join('.')}`,
+    c.cinsiyet && (c.cinsiyet === 'E' ? 'Erkek' : 'Kadın'),
+    (c.anne_adi || c.baba_adi) && `Anne/Baba: ${c.anne_adi || '-'} / ${c.baba_adi || '-'}`,
+    c.kimlik_seri_no && `Seri: ${c.kimlik_seri_no}`,
+  ].filter(Boolean);
+  if (satirlar.length === 0) return null;
+  // Tek kapsayıcı: telefondaki kart görünümünde satırlar alt alta kalsın
+  return (
+    <div>
+      {satirlar.map((satir) => (
+        <div key={satir}>{satir}</div>
+      ))}
+    </div>
+  );
+}
 
 export default function Cariler() {
   const [liste, setListe] = useState([]);
@@ -36,15 +61,22 @@ export default function Cariler() {
     setKimlikOkuma({ ilerleme: 0 });
     try {
       const sonuc = await kimlikFotografiniOku(dosya, (ilerleme) => setKimlikOkuma({ ilerleme }));
-      if (!sonuc.tc && !sonuc.ad && !sonuc.soyad) {
+      if (!Object.values(sonuc).some(Boolean)) {
         setKimlikOkuma({ hata: 'Kimlik okunamadı. Kartı düz bir zemine koyup, ışığı iyi bir yerde, yansıma olmadan ve kart ekranı dolduracak şekilde tekrar çekin.' });
         return;
       }
+      // Yalnızca okunabilen alanlar doldurulur; ön ve arka yüz ayrı ayrı okutulunca birbirini tamamlar
       setForm((f) => ({
         ...f,
         kimlik_turu: 'tc',
         isim_unvan: sonuc.ad && sonuc.soyad ? buyukHarfBasla(`${sonuc.ad} ${sonuc.soyad}`) : f.isim_unvan,
         tc_no: sonuc.tc || f.tc_no,
+        dogum_tarihi: sonuc.dogumTarihi || f.dogum_tarihi,
+        cinsiyet: sonuc.cinsiyet || f.cinsiyet,
+        kimlik_seri_no: sonuc.seriNo || f.kimlik_seri_no,
+        kimlik_gecerlilik: sonuc.gecerlilik || f.kimlik_gecerlilik,
+        anne_adi: sonuc.anneAdi ? buyukHarfBasla(sonuc.anneAdi) : f.anne_adi,
+        baba_adi: sonuc.babaAdi ? buyukHarfBasla(sonuc.babaAdi) : f.baba_adi,
       }));
       setKimlikOkuma({ sonuc });
     } catch {
@@ -116,15 +148,13 @@ export default function Cariler() {
           {kimlikOkuma?.hata && <span className="hata-mesaji">{kimlikOkuma.hata}</span>}
           {kimlikOkuma?.sonuc && (
             <span>
-              {kimlikOkuma.sonuc.tc ? (
-                <b style={{ color: 'var(--renk-yesil)' }}>✓ TC Kimlik No geçerli</b>
-              ) : (
-                <b className="uyari-metni">⚠ TC Kimlik No okunamadı, elle girin</b>
-              )}
-              {kimlikOkuma.sonuc.dogumTarihi && (
-                <span className="soluk-metin"> · Doğum: {kimlikOkuma.sonuc.dogumTarihi.split('-').reverse().join('.')}</span>
-              )}
-              <span className="soluk-metin"> · Okunan bilgileri kaydetmeden önce kontrol edin.</span>
+              {kimlikOkuma.sonuc.tc && <b style={{ color: 'var(--renk-yesil)' }}>✓ TC Kimlik No geçerli · </b>}
+              {!kimlikOkuma.sonuc.tc && !form.tc_no && <b className="uyari-metni">⚠ TC Kimlik No okunamadı · </b>}
+              <span className="soluk-metin">
+                {Object.values(kimlikOkuma.sonuc).filter(Boolean).length} bilgi dolduruldu.
+                {!form.anne_adi && ' Anne/baba adı için kartın arka yüzünü de okutun.'}
+                {!form.tc_no && ' TC ve ad soyad için ön yüzü okutun.'} Kaydetmeden önce kontrol edin.
+              </span>
             </span>
           )}
         </div>
@@ -181,6 +211,47 @@ export default function Cariler() {
           </>
         )}
 
+        {form.kimlik_turu === 'tc' && (
+          <div className="kimlik-alanlari">
+            <label>
+              Doğum Tarihi
+              <input type="date" value={form.dogum_tarihi} onChange={(e) => setForm({ ...form, dogum_tarihi: e.target.value })} />
+            </label>
+            <label>
+              Cinsiyet
+              <select value={form.cinsiyet} onChange={(e) => setForm({ ...form, cinsiyet: e.target.value })}>
+                <option value="">Seç</option>
+                <option value="E">Erkek</option>
+                <option value="K">Kadın</option>
+              </select>
+            </label>
+            <label>
+              Kimlik Seri No
+              <input
+                value={form.kimlik_seri_no}
+                onChange={(e) => setForm({ ...form, kimlik_seri_no: e.target.value.toUpperCase() })}
+                maxLength={20}
+              />
+            </label>
+            <label>
+              Son Geçerlilik
+              <input
+                type="date"
+                value={form.kimlik_gecerlilik}
+                onChange={(e) => setForm({ ...form, kimlik_gecerlilik: e.target.value })}
+              />
+            </label>
+            <label>
+              Anne Adı
+              <input value={form.anne_adi} onChange={(e) => setForm({ ...form, anne_adi: e.target.value })} />
+            </label>
+            <label>
+              Baba Adı
+              <input value={form.baba_adi} onChange={(e) => setForm({ ...form, baba_adi: e.target.value })} />
+            </label>
+          </div>
+        )}
+
         <input placeholder="Telefon" value={form.telefon} onChange={(e) => setForm({ ...form, telefon: e.target.value })} />
         <input placeholder="Adres" value={form.adres} onChange={(e) => setForm({ ...form, adres: e.target.value })} />
         <input
@@ -228,6 +299,7 @@ export default function Cariler() {
             <th>Ünvan / İsim</th>
             <th>Tür</th>
             <th>Kimlik</th>
+            <th>Kimlik Bilgileri</th>
             <th>Vergi Dairesi</th>
             <th>Telefon</th>
             <th>İl / İlçe / Mahalle</th>
@@ -244,6 +316,7 @@ export default function Cariler() {
                 {[c.ciftci_mi && 'Çiftçi', c.alici_mi && 'Alıcı'].filter(Boolean).join(' / ') || '-'}
               </td>
               <td>{c.kimlik_turu === 'tc' ? c.tc_no : c.vergi_no}</td>
+              <td>{kimlikBilgileri(c)}</td>
               <td>{c.vergi_dairesi}</td>
               <td>{c.telefon}</td>
               <td>{[c.il, c.ilce, c.mahalle].filter(Boolean).join(' / ')}</td>

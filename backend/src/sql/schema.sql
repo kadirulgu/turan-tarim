@@ -81,6 +81,13 @@ ALTER TABLE cariler ADD COLUMN IF NOT EXISTS sozlesme_dosya_adi VARCHAR(255);
 ALTER TABLE cariler ADD COLUMN IF NOT EXISTS sozlesme_tarihi DATE;
 ALTER TABLE cariler ADD COLUMN IF NOT EXISTS sozlesme_no VARCHAR(50);
 ALTER TABLE cariler ADD COLUMN IF NOT EXISTS iban VARCHAR(34);
+-- Kimlik kartından okunan bilgiler (kişi kayıtları için)
+ALTER TABLE cariler ADD COLUMN IF NOT EXISTS dogum_tarihi DATE;
+ALTER TABLE cariler ADD COLUMN IF NOT EXISTS cinsiyet VARCHAR(1) CHECK (cinsiyet IS NULL OR cinsiyet IN ('E', 'K'));
+ALTER TABLE cariler ADD COLUMN IF NOT EXISTS kimlik_seri_no VARCHAR(20);
+ALTER TABLE cariler ADD COLUMN IF NOT EXISTS kimlik_gecerlilik DATE;
+ALTER TABLE cariler ADD COLUMN IF NOT EXISTS anne_adi VARCHAR(100);
+ALTER TABLE cariler ADD COLUMN IF NOT EXISTS baba_adi VARCHAR(100);
 
 CREATE TABLE IF NOT EXISTS araziler (
   id SERIAL PRIMARY KEY,
