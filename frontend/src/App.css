@@ -756,6 +756,55 @@ tbody tr:hover {
   font-size: 10px;
 }
 
+/* "Telefonuna uygulama olarak kur" kartı */
+.kurulum-onerisi {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--renk-beyaz);
+  border: 1px solid var(--renk-sinir);
+  border-left: 4px solid var(--renk-bugday);
+  border-radius: 12px;
+  padding: 10px 8px 10px 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.kurulum-onerisi img {
+  flex: none;
+  border-radius: 10px;
+}
+
+.kurulum-metin {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.kurulum-metin strong {
+  color: var(--renk-yesil-koyu);
+}
+
+button.kurulum-kapat {
+  flex: none;
+  align-self: flex-start;
+  min-height: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  color: var(--renk-metin-soluk);
+  font-size: 24px;
+  line-height: 1;
+}
+
+button.kurulum-kapat:hover {
+  background: var(--renk-krem);
+}
+
 /* Telefonda ekranın altındaki menü (bilgisayarda gizli) */
 .alt-gezinme,
 .diger-arkaplan {

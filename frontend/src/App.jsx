@@ -14,6 +14,7 @@ import Kullanicilar from './pages/Kullanicilar';
 import Kilavuz from './pages/Kilavuz';
 import HataSiniri from './components/HataSiniri';
 import AcilisEkrani from './components/AcilisEkrani';
+import KurulumOnerisi from './components/KurulumOnerisi';
 import { api } from './api';
 import { useTabloEtiketleri } from './tabloEtiketleri';
 import './App.css';
@@ -80,11 +81,19 @@ export default function App() {
   }
 
   if (!kullanici) {
-    return <Giris onGirisYapildi={setKullanici} />;
+    return (
+      <>
+        <div className="uygulama" style={{ maxWidth: 420, paddingBottom: 0 }}>
+          <KurulumOnerisi />
+        </div>
+        <Giris onGirisYapildi={setKullanici} />
+      </>
+    );
   }
 
   return (
     <div className="uygulama">
+      <KurulumOnerisi />
       <h1 className="uygulama-baslik">🌾 Turan Tarım — Sözleşmeli Ekim Takip Sistemi</h1>
       <nav className="gezinme">
         {SAYFALAR.map((s) => (
