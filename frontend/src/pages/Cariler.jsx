@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, dosyaAc } from '../api';
 import IlIlceSecici from '../components/IlIlceSecici';
+import KimlikKamerasi from '../components/KimlikKamerasi';
 import { buyukHarfBasla, kimlikFotografiniOku, tcGecerliMi } from '../kimlikOku';
 
 const bosForm = {
@@ -53,11 +54,17 @@ export default function Cariler() {
   const [hata, setHata] = useState('');
   // Kimlik kartı okuma durumu: null | { ilerleme } | { sonuc } | { hata }
   const [kimlikOkuma, setKimlikOkuma] = useState(null);
+  // 'kapali' | 'acik' | 'yok' (tarayıcı kamerayı açamadı: telefonun kendi kamera uygulamasına düşülür)
+  const [kamera, setKamera] = useState('kapali');
 
-  const kimliktenDoldur = async (e) => {
+  const dosyadanDoldur = (e) => {
     const dosya = e.target.files[0];
     e.target.value = '';
-    if (!dosya) return;
+    if (dosya) kimliktenDoldur(dosya);
+  };
+
+  const kimliktenDoldur = async (dosya) => {
+    setKamera((k) => (k === 'acik' ? 'kapali' : k));
     setKimlikOkuma({ ilerleme: 0 });
     try {
       const sonuc = await kimlikFotografiniOku(dosya, (ilerleme) => setKimlikOkuma({ ilerleme }));
@@ -131,17 +138,43 @@ export default function Cariler() {
 
       <form className="form-kart" onSubmit={ekle} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
         <div className="kimlik-okuma">
-          <label className={`kimlik-buton${kimlikOkuma?.ilerleme !== undefined ? ' pasif' : ''}`}>
-            📷 Kimlik Kartından Doldur
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={kimliktenDoldur}
+          {kamera === 'yok' ? (
+            // Tarayıcı kamerası açılamadı: telefonun kendi kamerası (çerçevesiz)
+            <label className={`kimlik-buton${kimlikOkuma?.ilerleme !== undefined ? ' pasif' : ''}`}>
+              📷 Kimlik Kartından Doldur
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={dosyadanDoldur}
+                disabled={kimlikOkuma?.ilerleme !== undefined}
+                hidden
+              />
+            </label>
+          ) : (
+            <button
+              type="button"
+              className={`kimlik-buton${kimlikOkuma?.ilerleme !== undefined ? ' pasif' : ''}`}
+              onClick={() => setKamera('acik')}
               disabled={kimlikOkuma?.ilerleme !== undefined}
-              hidden
-            />
+            >
+              📷 Kimlik Kartından Doldur
+            </button>
+          )}
+          <label className="soluk-metin galeriden">
+            veya galeriden seç
+            <input type="file" accept="image/*" onChange={dosyadanDoldur} hidden />
           </label>
+          {kamera === 'acik' && (
+            <KimlikKamerasi
+              onCekildi={kimliktenDoldur}
+              onKapat={() => setKamera('kapali')}
+              onHata={() => {
+                setKamera('yok');
+                setKimlikOkuma({ hata: 'Kamera açılamadı (izin verilmemiş olabilir). Butona tekrar basınca telefonun kendi kamerası açılır.' });
+              }}
+            />
+          )}
           {kimlikOkuma?.ilerleme !== undefined && (
             <span className="soluk-metin">Kimlik okunuyor… %{kimlikOkuma.ilerleme}</span>
           )}

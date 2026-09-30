@@ -795,9 +795,113 @@ tbody tr:hover {
   cursor: pointer;
 }
 
+.galeriden {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .kimlik-buton.pasif {
   opacity: 0.6;
   cursor: wait;
+}
+
+/* Kimlik kamerası: canlı görüntü + yeşil kart çerçevesi */
+.kamera-ekrani {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: #000;
+}
+
+.kamera-ekrani video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kamera-cerceve {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #4caf50;
+  border-radius: 14px;
+  /* Çerçeve dışını karartır */
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.kamera-cerceve .kose {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border: 0 solid #4caf50;
+}
+
+.kamera-cerceve .sol-ust { top: -4px; left: -4px; border-top-width: 6px; border-left-width: 6px; border-top-left-radius: 16px; }
+.kamera-cerceve .sag-ust { top: -4px; right: -4px; border-top-width: 6px; border-right-width: 6px; border-top-right-radius: 16px; }
+.kamera-cerceve .sol-alt { bottom: -4px; left: -4px; border-bottom-width: 6px; border-left-width: 6px; border-bottom-left-radius: 16px; }
+.kamera-cerceve .sag-alt { bottom: -4px; right: -4px; border-bottom-width: 6px; border-right-width: 6px; border-bottom-right-radius: 16px; }
+
+/* Ön yüz yerleşim ipucu: vesikalık solda */
+.kamera-cerceve .foto-izi {
+  position: absolute;
+  left: 5%;
+  top: 22%;
+  width: 24%;
+  height: 62%;
+  border: 1.5px dashed rgba(76, 175, 80, 0.7);
+  border-radius: 6px;
+}
+
+.kamera-ipucu {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 22px);
+  transform: translateX(-50%);
+  width: min(100vw, 520px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 28px;
+  color: #fff;
+  text-align: center;
+  font-size: 14px;
+}
+
+.kamera-ipucu strong {
+  font-size: 17px;
+}
+
+.kamera-alt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(32px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.kamera-yan {
+  width: 90px;
+  background: none;
+  color: #fff;
+  font-size: 16px;
+}
+
+button.kamera-deklansor {
+  width: 76px;
+  height: 76px;
+  padding: 0;
+  border: 5px solid #fff;
+  border-radius: 50%;
+  background: #4caf50;
+  box-shadow: inset 0 0 0 4px #000;
+}
+
+button.kamera-deklansor:disabled {
+  opacity: 0.5;
 }
 
 /* "Telefonuna uygulama olarak kur" kartı */
