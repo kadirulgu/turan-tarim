@@ -114,9 +114,14 @@ Ekstra kurulum veya hesap gerekmiyor; aşağıdaki "Her gün nasıl
 
 ## Her gün nasıl çalıştırılır
 
+**Otomatik:** Windows oturumu açılınca "Turan Tarim Sunucu" zamanlanmış
+görevi `sunucu-baslat.ps1`'i çalıştırır; backend ve Cloudflare tüneli gizli
+pencerede başlar, kapanırlarsa 30 saniye içinde yeniden açılır. Kayıtlar
+`loglar/` klasöründedir. Elle bir şey yapmaya gerek yoktur.
+
 Arayüz derlenip backend üzerinden verilir; site http://localhost:4000
-adresinde ve `cnrsystem.com.tr` üzerinden açılır. İki ayrı PowerShell
-penceresi gerekir:
+adresinde ve `cnrsystem.com.tr` üzerinden açılır. Otomatik başlatma
+kapalıysa elle çalıştırmak için iki ayrı PowerShell penceresi gerekir:
 
 ```powershell
 cd "backend"; npm run dev
