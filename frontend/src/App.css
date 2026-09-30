@@ -756,47 +756,205 @@ tbody tr:hover {
   font-size: 10px;
 }
 
+/* Telefonda ekranın altındaki menü (bilgisayarda gizli) */
+.alt-gezinme,
+.diger-arkaplan {
+  display: none;
+}
+
 /* Telefon ekranı */
 @media (max-width: 700px) {
   .uygulama {
-    padding: 12px 12px 48px;
+    padding: 12px 12px calc(84px + env(safe-area-inset-bottom));
   }
 
   .uygulama-baslik {
-    font-size: 19px;
-    margin-bottom: 12px;
+    font-size: 18px;
+    margin-bottom: 4px;
   }
 
-  /* Menü tek satır, yana kaydırılır */
+  h2 {
+    margin-top: 16px;
+  }
+
+  /* Üstteki menünün yerini alttaki sabit menü alır */
   .gezinme {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    margin-bottom: 16px;
-  }
-
-  .gezinme::-webkit-scrollbar {
     display: none;
   }
 
-  .gezinme a,
-  .gezinme button {
-    flex: none;
-    padding: 8px 12px;
-    font-size: 14px;
+  .alt-gezinme {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1100;
+    background: var(--renk-yesil-koyu);
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
   }
 
-  /* Geniş tablolar sayfayı değil kendi içini kaydırır */
+  .alt-gezinme a,
+  .alt-gezinme button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-height: 56px;
+    justify-content: center;
+    padding: 4px 2px;
+    border-radius: 10px;
+    background: none;
+    color: #eaf3e8;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .alt-gezinme .aktif {
+    background: var(--renk-bugday);
+    color: #3a2a00;
+  }
+
+  .alt-ikon {
+    font-size: 21px;
+    line-height: 1;
+  }
+
+  .diger-arkaplan {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1090;
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .diger-menu {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px;
+    background: var(--renk-beyaz);
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .diger-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 12px;
+    border-radius: 10px;
+    color: var(--renk-metin);
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .diger-menu a.aktif {
+    background: var(--renk-krem);
+    color: var(--renk-yesil-koyu);
+  }
+
+  .diger-ikon {
+    font-size: 20px;
+  }
+
+  .diger-menu button {
+    margin-top: 6px;
+    padding: 13px;
+    font-size: 15px;
+  }
+
+  /* Tablolar kart listesine dönüşür; sütun adları data-etiket'ten gelir */
   table {
     display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
   }
 
-  th,
+  thead {
+    display: none;
+  }
+
+  tbody {
+    display: block;
+  }
+
+  tbody tr,
+  tbody tr:nth-child(even),
+  tbody tr:hover {
+    display: block;
+    background: var(--renk-beyaz);
+    border: 1px solid var(--renk-sinir);
+    border-left: 4px solid var(--renk-yesil);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+
   td {
-    white-space: nowrap;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    border: none;
+    font-size: 15px;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  td + td {
+    border-top: 1px solid #f0ebdd;
+  }
+
+  td::before {
+    content: attr(data-etiket);
+    flex: none;
+    max-width: 45%;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--renk-metin-soluk);
+  }
+
+  /* Başlıksız sütunlar (butonlar, açılır detaylar) etiketsiz ve tam genişlikte */
+  td[data-etiket=''] {
+    display: block;
+    text-align: left;
+  }
+
+  td[data-etiket='']::before {
+    display: none;
+  }
+
+  td:empty {
+    display: none;
+  }
+
+  /* Kartın ilk satırı (genelde isim) başlık gibi */
+  td:first-child:not([data-etiket='']) {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--renk-yesil-koyu);
+  }
+
+  .tablo-kaydir {
+    overflow-x: visible;
+  }
+
+  /* Parmakla basmaya uygun buton ve kutular */
+  button:not(.foto-sil):not(.foto-sil-satir):not(.foto-ac):not(.foto-ekle):not(.renk-nokta) {
+    min-height: 40px;
   }
 
   /* iPhone yazı kutusuna dokununca ekranı büyütmesin */
@@ -805,5 +963,12 @@ tbody tr:hover {
   textarea {
     font-size: 16px;
     max-width: 100%;
+    min-height: 42px;
+  }
+
+  input[type='checkbox'] {
+    min-height: 0;
+    width: 20px;
+    height: 20px;
   }
 }

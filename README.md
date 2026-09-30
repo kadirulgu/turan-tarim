@@ -114,13 +114,28 @@ Ekstra kurulum veya hesap gerekmiyor; aşağıdaki "Her gün nasıl
 
 ## Her gün nasıl çalıştırılır
 
-İki ayrı PowerShell penceresi gerekir:
+Arayüz derlenip backend üzerinden verilir; site http://localhost:4000
+adresinde ve `cnrsystem.com.tr` üzerinden açılır. İki ayrı PowerShell
+penceresi gerekir:
 
 ```powershell
 cd "backend"; npm run dev
 ```
 
 ```powershell
-cd "frontend"; npm run dev
+cloudflared tunnel run turan-tarim
 ```
+
+Arayüzde (`frontend/`) bir değişiklik yapıldığında bir kez yeniden derle;
+backend'i yeniden başlatmak gerekmez:
+
+```powershell
+cd "frontend"; npm run build
+```
+
+Arayüz üzerinde çalışırken anında yenilenen geliştirme sunucusu için
+`cd "frontend"; npm run dev` (http://localhost:5173) hâlâ kullanılabilir.
+
+**Telefona kurulum (Android):** Chrome'da siteyi aç → sağ üstteki ⋮ menü →
+"Ana ekrana ekle" / "Uygulamayı yükle". Gonca simgesiyle tam ekran açılır.
 turanlar tarım projeyi çalıştır

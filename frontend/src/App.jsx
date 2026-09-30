@@ -15,15 +15,35 @@ import Kilavuz from './pages/Kilavuz';
 import HataSiniri from './components/HataSiniri';
 import AcilisEkrani from './components/AcilisEkrani';
 import { api } from './api';
+import { useTabloEtiketleri } from './tabloEtiketleri';
 import './App.css';
 
 const linkSinifi = ({ isActive }) => (isActive ? 'aktif' : undefined);
+
+const SAYFALAR = [
+  { yol: '/', ikon: '📊', ad: 'Özet', altMenu: true },
+  { yol: '/harita', ikon: '🗺️', ad: 'Harita', altMenu: true },
+  { yol: '/cariler', ikon: '👤', ad: 'Çiftçi / Cari', kisaAd: 'Çiftçi', altMenu: true },
+  { yol: '/araziler', ikon: '🌾', ad: 'Araziler' },
+  { yol: '/sozlesmeler', ikon: '📋', ad: 'Sözleşmeler' },
+  { yol: '/ekimler', ikon: '🌱', ad: 'Ekimler', altMenu: true },
+  { yol: '/receteler', ikon: '🧪', ad: 'Reçeteler' },
+  { yol: '/firmalar', ikon: '🏢', ad: 'Firmalarımız' },
+  { yol: '/hububat-borsasi', ikon: '📈', ad: 'Hububat Borsası' },
+  { yol: '/kullanicilar', ikon: '👥', ad: 'Kullanıcılar' },
+  { yol: '/kilavuz', ikon: '📘', ad: 'Kılavuz' },
+];
 
 export default function App() {
   const [kullanici, setKullanici] = useState(null);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [acilisGosterildi, setAcilisGosterildi] = useState(false);
+  const [digerAcik, setDigerAcik] = useState(false);
   const konum = useLocation();
+  useTabloEtiketleri();
+
+  // Sayfa değişince telefondaki "Diğer" menüsü kapansın
+  useEffect(() => setDigerAcik(false), [konum.pathname]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -67,19 +87,44 @@ export default function App() {
     <div className="uygulama">
       <h1 className="uygulama-baslik">🌾 Turan Tarım — Sözleşmeli Ekim Takip Sistemi</h1>
       <nav className="gezinme">
-        <NavLink to="/" end className={linkSinifi}>📊 Özet</NavLink>
-        <NavLink to="/harita" className={linkSinifi}>🗺️ Harita</NavLink>
-        <NavLink to="/cariler" className={linkSinifi}>👤 Çiftçi / Cari</NavLink>
-        <NavLink to="/araziler" className={linkSinifi}>🌾 Araziler</NavLink>
-        <NavLink to="/sozlesmeler" className={linkSinifi}>📋 Sözleşmeler</NavLink>
-        <NavLink to="/ekimler" className={linkSinifi}>🌱 Ekimler</NavLink>
-        <NavLink to="/receteler" className={linkSinifi}>🧪 Reçeteler</NavLink>
-        <NavLink to="/firmalar" className={linkSinifi}>🏢 Firmalarımız</NavLink>
-        <NavLink to="/hububat-borsasi" className={linkSinifi}>📈 Hububat Borsası</NavLink>
-        <NavLink to="/kullanicilar" className={linkSinifi}>👥 Kullanıcılar</NavLink>
-        <NavLink to="/kilavuz" className={linkSinifi}>📘 Kılavuz</NavLink>
+        {SAYFALAR.map((s) => (
+          <NavLink key={s.yol} to={s.yol} end={s.yol === '/'} className={linkSinifi}>
+            {s.ikon} {s.ad}
+          </NavLink>
+        ))}
         <button className="btn-ikincil" onClick={cikisYap} style={{ marginLeft: 'auto' }}>
           🚪 Çıkış ({kullanici.kullanici_adi})
+        </button>
+      </nav>
+
+      {/* Telefonda ekranın altında sabit menü */}
+      {digerAcik && (
+        <div className="diger-arkaplan" onClick={() => setDigerAcik(false)}>
+          <div className="diger-menu" onClick={(e) => e.stopPropagation()}>
+            {SAYFALAR.filter((s) => !s.altMenu).map((s) => (
+              <NavLink key={s.yol} to={s.yol} className={linkSinifi}>
+                <span className="diger-ikon">{s.ikon}</span> {s.ad}
+              </NavLink>
+            ))}
+            <button className="btn-ikincil" onClick={cikisYap}>
+              🚪 Çıkış ({kullanici.kullanici_adi})
+            </button>
+          </div>
+        </div>
+      )}
+      <nav className="alt-gezinme">
+        {SAYFALAR.filter((s) => s.altMenu).map((s) => (
+          <NavLink key={s.yol} to={s.yol} end={s.yol === '/'} className={linkSinifi}>
+            <span className="alt-ikon">{s.ikon}</span>
+            {s.kisaAd || s.ad}
+          </NavLink>
+        ))}
+        <button
+          className={SAYFALAR.some((s) => !s.altMenu && s.yol === konum.pathname) || digerAcik ? 'aktif' : undefined}
+          onClick={() => setDigerAcik((a) => !a)}
+        >
+          <span className="alt-ikon">☰</span>
+          Diğer
         </button>
       </nav>
 

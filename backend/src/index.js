@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -44,6 +45,23 @@ app.use('/api/hububat-borsasi', dogrula, hububatBorsasiRouter);
 app.use('/api/hava-durumu', dogrula, havaDurumuRouter);
 app.use('/api/referans-parseller', dogrula, referansParselerRouter);
 app.use('/api/ozet', dogrula, ozetRouter);
+
+// Derlenmiş arayüz (frontend/dist, "npm run build" ile oluşur) aynı sunucudan verilir.
+// assets/ altındaki dosyaların adında içerik özeti olduğu için uzun süre önbelleklenebilir.
+const arayuzKlasoru = path.join(__dirname, '..', '..', 'frontend', 'dist');
+if (fs.existsSync(arayuzKlasoru)) {
+  app.use(
+    express.static(arayuzKlasoru, {
+      setHeaders: (res, dosyaYolu) => {
+        if (dosyaYolu.includes(`${path.sep}assets${path.sep}`)) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      },
+    })
+  );
+  // /harita gibi arayüz sayfaları doğrudan açılınca da index.html dönsün
+  app.get(/^\/(?!api\/).*/, (req, res) => res.sendFile(path.join(arayuzKlasoru, 'index.html')));
+}
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`));
