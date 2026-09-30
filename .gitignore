@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+
+# Gizli ayarlar
+.env
+.env.local
+
+# Yüklenen dosyalar (sözleşme PDF'leri, fotoğraflar)
+backend/uploads/*
+!backend/uploads/.gitkeep

@@ -1,0 +1,22 @@
+{
+  "name": "turan-tarim-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "db:init": "node src/initDb.js"
+  },
+  "dependencies": {
+    "@tmcw/togeojson": "^5.8.1",
+    "@xmldom/xmldom": "^0.8.10",
+    "bcryptjs": "^3.0.3",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
+    "pg": "^8.11.5"
+  }
+}

@@ -1,0 +1,31 @@
+:root {
+  --renk-yesil-koyu: #1b5e20;
+  --renk-yesil: #2e7d32;
+  --renk-yesil-acik: #66bb6a;
+  --renk-toprak: #6d4c41;
+  --renk-bugday: #d4a017;
+  --renk-bugday-koyu: #b8860b;
+  --renk-krem: #faf6ec;
+  --renk-beyaz: #ffffff;
+  --renk-metin: #2b2b23;
+  --renk-metin-soluk: #6b6b5f;
+  --renk-kirmizi: #b3261e;
+  --renk-sinir: #ddd6c3;
+
+  color-scheme: light;
+  font: 16px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--renk-krem);
+  color: var(--renk-metin);
+}
+
+h1, h2, h3 {
+  color: var(--renk-yesil-koyu);
+}
+
+a {
+  color: var(--renk-yesil-koyu);
+}
