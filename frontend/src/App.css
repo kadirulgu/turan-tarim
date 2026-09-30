@@ -251,6 +251,7 @@ button {
   padding: 9px 16px;
   font-size: 14px;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.05s ease;
 }
