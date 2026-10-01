@@ -8,8 +8,6 @@ New-Item -ItemType Directory -Force $loglar | Out-Null
 
 $node = 'C:\Program Files\nodejs\node.exe'
 $cloudflared = 'C:\Program Files (x86)\cloudflared\cloudflared.exe'
-# cnrsystem.tr sitesi (Node.js), tunelde 8080'e yonlenir
-$cnrsite = 'C:\Users\kadir\Desktop\cnrsystem-site'
 
 function PortAcikMi($port) {
   $istemci = New-Object Net.Sockets.TcpClient
@@ -30,11 +28,6 @@ while ($true) {
     $backend = Start-Process $node -ArgumentList 'src/index.js' -WorkingDirectory (Join-Path $proje 'backend') `
       -WindowStyle Hidden -PassThru `
       -RedirectStandardOutput (Join-Path $loglar 'backend.log') -RedirectStandardError (Join-Path $loglar 'backend-hata.log')
-  }
-  if ((Test-Path $cnrsite) -and -not (PortAcikMi 8080)) {
-    Kaydet 'cnrsystem.tr sitesi baslatiliyor'
-    Start-Process $node -ArgumentList 'src/index.js' -WorkingDirectory $cnrsite -WindowStyle Hidden `
-      -RedirectStandardOutput (Join-Path $loglar 'cnrsite.log') -RedirectStandardError (Join-Path $loglar 'cnrsite-hata.log')
   }
   if (-not (Get-Process cloudflared -ErrorAction SilentlyContinue)) {
     Kaydet 'Tunel baslatiliyor'
