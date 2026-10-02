@@ -8,6 +8,8 @@ New-Item -ItemType Directory -Force $loglar | Out-Null
 
 $node = 'C:\Program Files\nodejs\node.exe'
 $cloudflared = 'C:\Program Files (x86)\cloudflared\cloudflared.exe'
+# Velesbid (cnrsystem.tr/velesbid): ayarlarini kendi .env dosyasindan okur, port 4100
+$velesbid = 'C:\Users\kadir\Desktop\bisiklet\backend'
 
 function PortAcikMi($port) {
   $istemci = New-Object Net.Sockets.TcpClient
@@ -28,6 +30,11 @@ while ($true) {
     $backend = Start-Process $node -ArgumentList 'src/index.js' -WorkingDirectory (Join-Path $proje 'backend') `
       -WindowStyle Hidden -PassThru `
       -RedirectStandardOutput (Join-Path $loglar 'backend.log') -RedirectStandardError (Join-Path $loglar 'backend-hata.log')
+  }
+  if ((Test-Path (Join-Path $velesbid '.env')) -and -not (PortAcikMi 4100)) {
+    Kaydet 'Velesbid baslatiliyor'
+    Start-Process $node -ArgumentList '--env-file=.env', 'src/index.js' -WorkingDirectory $velesbid -WindowStyle Hidden `
+      -RedirectStandardOutput (Join-Path $loglar 'velesbid.log') -RedirectStandardError (Join-Path $loglar 'velesbid-hata.log')
   }
   if (-not (Get-Process cloudflared -ErrorAction SilentlyContinue)) {
     Kaydet 'Tunel baslatiliyor'
